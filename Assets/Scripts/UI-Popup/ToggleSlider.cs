@@ -20,15 +20,15 @@ namespace Teras
 		[SerializeField] private float			handleAnimSpeed		= 0f;
 		[SerializeField] private bool			handleFollowsMouse	= false;
 
-		[Space]
+		//[Space]
 
 		//[SerializeField] private Graphic		handleColorGraphic	= null;
 		//[SerializeField] private Color			handleOnColor		= Color.white;
 		//[SerializeField] private Color			handleOffColor		= Color.white;
-		[SerializeField] private Image target = null;
+		//[SerializeField] private Image target = null;
 
 
-        [Space]
+        //[Space]
 
 		//[SerializeField] private Text 			onText				= null;
 		//[SerializeField] private Text 			offText				= null;
@@ -167,8 +167,8 @@ namespace Teras
 
 		private void SetUI(float t)
 		{
-            Sprite newSprite = t > 0.5f ? SpriteManager.Instance.spriteOn : SpriteManager.Instance.spriteOff;
-            target.sprite = newSprite;
+            //Sprite newSprite = t > 0.5f ? SpriteManager.Instance.spriteOn : SpriteManager.Instance.spriteOff;
+            //target.sprite = newSprite;
 
             // Đối với text, ẩn/hiện tương ứng với trạng thái của sprite
             //onText.enabled = t > 0.5f;

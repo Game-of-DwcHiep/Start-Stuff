@@ -13,7 +13,7 @@ public class LevelItemUI : MonoBehaviour
 
     public Text numberLevel;
 
-    public void UpdateUIItem(int level)
+   /* public void UpdateUIItem(int level)
     {
         this.level = level;
         if(level  < GameManager.Instance.LevelNumber)
@@ -42,5 +42,5 @@ public class LevelItemUI : MonoBehaviour
         {
             Debug.LogError("Level hien tai la " + GameManager.Instance.LevelNumber);
         }
-    }
+    }*/
 }
