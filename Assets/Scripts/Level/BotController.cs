@@ -27,19 +27,19 @@ public class BotController : MonoBehaviour
     // =============================
     //  Di chuyển tự động
     // =============================
-    public IEnumerator MoveTo(Vector3 target)
-    {
-        Vector3 direction = (target - transform.position).normalized;
-        transform.rotation = Quaternion.LookRotation(-direction);
-        while (Vector3.Distance(transform.position, target) > 0.1f)
-        {         
-            direction = (target - transform.position).normalized;
-            rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
-            yield return null;
-        }
-        if(nearbySlot != null)
-            nearbySlot.SetBox(false);
-    }
+    // public IEnumerator MoveTo(Vector3 target)
+    // {
+    //     Vector3 direction = (target - transform.position).normalized;
+    //     transform.rotation = Quaternion.LookRotation(-direction);
+    //     while (Vector3.Distance(transform.position, target) > 0.1f)
+    //     {         
+    //         direction = (target - transform.position).normalized;
+    //         rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+    //         yield return null;
+    //     }
+    //     if(nearbySlot != null)
+    //         nearbySlot.SetBox(false);
+    // }
 
     // public IEnumerator MoveTo(Vector3 target)
     // {
@@ -75,6 +75,68 @@ public class BotController : MonoBehaviour
     //     if (nearbySlot != null)
     //         nearbySlot.SetBox(false);
     // }
+
+    public IEnumerator MoveTo(Vector3 target)
+    {
+        Vector3 start = transform.position;
+        Vector3 current = start;
+
+        // Giới hạn vòng lặp (phòng tránh lỗi vô hạn)
+        int safetyCounter = 0;
+
+        while (Vector3.Distance(current, target) > 0.1f && safetyCounter < 500)
+        {
+            safetyCounter++;
+
+            // Tính hướng di chuyển chính (theo trục lớn hơn)
+            Vector3 diff = target - current;
+            Vector3 moveDir = Vector3.zero;
+
+            // Chọn trục nào còn xa hơn
+            if (Mathf.Abs(diff.x) > Mathf.Abs(diff.z))
+                moveDir = new Vector3(Mathf.Sign(diff.x), 0, 0);
+            else
+                moveDir = new Vector3(0, 0, Mathf.Sign(diff.z));
+
+            // Kiểm tra xem hướng đó có bị chặn không
+            if (Physics.Raycast(current + Vector3.up * 0.5f, moveDir, out RaycastHit hit, 1f))
+            {
+                // Nếu bị chặn, thử đổi trục
+                Vector3 altDir = (moveDir.x != 0) ? new Vector3(0, 0, Mathf.Sign(diff.z)) : new Vector3(Mathf.Sign(diff.x), 0, 0);
+
+                // Nếu hướng phụ không bị chặn → đi hướng đó
+                if (!Physics.Raycast(current + Vector3.up * 0.5f, altDir, 1f))
+                {
+                    moveDir = altDir;
+                }
+                else
+                {
+                    // Nếu cả hai hướng đều bị chặn → dừng
+                    Debug.LogWarning("🚧 Bot bị kẹt tại " + current);
+                    yield break;
+                }
+            }
+
+            // Xoay bot theo hướng di chuyển
+            transform.rotation = Quaternion.LookRotation(-moveDir);
+
+            // Di chuyển dần dần tới bước tiếp theo
+            Vector3 nextPos = current + moveDir;
+            while (Vector3.Distance(transform.position, nextPos) > 0.05f)
+            {
+                rb.MovePosition(Vector3.MoveTowards(rb.position, nextPos, speed * Time.deltaTime));
+                yield return null;
+            }
+
+            current = nextPos; // cập nhật vị trí mới
+        }
+
+        rb.linearVelocity = Vector3.zero;
+        transform.position = new Vector3(target.x, start.y, target.z);
+        if (nearbySlot != null)
+            nearbySlot.SetBox(false);
+    }
+
 
     // =============================
     //  Hành động: Nhặt box
