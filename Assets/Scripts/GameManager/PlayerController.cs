@@ -1,37 +1,40 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(BoxCollider))]
-public class PlayerController : MonoSingleton<PlayerController>
+public class PlayerController : MonoBehaviour
 {
+    public static PlayerController Instance;
+    public LevelController2 levelController;
+
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
 
     [Header("Pickup Settings")]
-    public Transform holdPoint;             // Vị trí để cầm box
-    public Transform dropPoint;             // Vị trí để thả box
-    public KeyCode pickupKey = KeyCode.Space; // Phím nhặt / thả
+    public Transform holdPoint;
+    public Transform dropPoint;
+    public KeyCode pickupKey = KeyCode.Space;
 
     private Rigidbody rb;
     private Vector3 moveDir;
-    private Vector3 contactNormal;
-    private bool isColliding = false;
 
-    private BoxHighlighter nearbyBox;   // Box gần player
-    private BoxHighlighter carriedBox;  // Box đang được cầm
+    private BoxHighlighter nearbyBox;
+    private BoxHighlighter carriedBox;
 
     public bool carriedBoxStatus = false;
     public BoxSlot nearbySlot;
-
     public BoxSlot2 nearbySlot2;
-
     public bool wingame = false;
 
+    // ✅ Dùng cho di chuyển bằng UI (mobile)
+    private Vector2 uiMoveInput = Vector2.zero;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true; // tránh bị nghiêng
+        rb.freezeRotation = true;
     }
 
     void Update()
@@ -50,77 +53,95 @@ public class PlayerController : MonoSingleton<PlayerController>
     // =============================
     void HandleMovementInput()
     {
-        float h = Input.GetAxisRaw("Horizontal");
-        float v = Input.GetAxisRaw("Vertical");
-        moveDir = new Vector3(h, 0, v).normalized;
+        // Nếu có input từ UI (mobile) thì dùng nó
+        if (uiMoveInput != Vector2.zero)
+        {
+            moveDir = new Vector3(uiMoveInput.x, 0, uiMoveInput.y).normalized;
+        }
+        else
+        {
+            // Nếu không, dùng bàn phím (cho PC)
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
+            moveDir = new Vector3(h, 0, v).normalized;
+        }
 
         if (moveDir != Vector3.zero)
-        {
             transform.rotation = Quaternion.LookRotation(-moveDir);
-        }
     }
 
     void MovePlayer()
     {
-        if (moveDir == Vector3.zero) return;
 
-        Vector3 finalDir = moveDir;
+        if (moveDir == Vector3.zero)
+        {
+            rb.linearVelocity = Vector3.zero; // (Unity 6+ dùng linearVelocity, Unity cũ dùng velocity)
+            return;
+        }
 
-         if (isColliding)
-         {
-             // Cho phép trượt dọc tường
-             finalDir = Vector3.ProjectOnPlane(moveDir, contactNormal).normalized;
-         }
-        rb.MovePosition(rb.position + finalDir * moveSpeed * Time.fixedDeltaTime);
+        Vector3 move = moveDir * moveSpeed;
+        move.y = rb.linearVelocity.y; // giữ lực trọng lực nếu có
+
+        rb.linearVelocity = move; // Rigidbody sẽ tự xử lý va chạm
     }
 
-    void OnCollisionStay(Collision collision)
+    // 📱 Các hàm cho UI Button gọi
+    public void OnMoveButtonDown(string direction)
     {
-        isColliding = true;
-        contactNormal = collision.contacts[0].normal;
+        switch (direction)
+        {
+            case "Up": uiMoveInput = Vector2.up; break;
+            case "Down": uiMoveInput = Vector2.down; break;
+            case "Left": uiMoveInput = Vector2.left; break;
+            case "Right": uiMoveInput = Vector2.right; break;
+        }
     }
 
-    void OnCollisionExit(Collision collision)
+    public void OnMoveButtonUp()
     {
-        isColliding = false;
+        uiMoveInput = Vector2.zero;
     }
 
     // =============================
-    // 📦 Xử lý nhặt và thả box
+    // 📦 Xử lý nhặt/thả
     // =============================
     void HandlePickupInput()
     {
         if (Input.GetKeyDown(pickupKey))
         {
-            if(wingame) 
-            {
-                WinGame();
-                return;
-            }
-
-            if (carriedBox == null && nearbyBox != null)
-            {
-                PickupBox(nearbyBox);
-            }
-            else if (carriedBox != null)
-            {
-                DropBox();
-            }
+            TryPickupOrDrop();
         }
     }
-    void WinGame()
-    {
-        Debug.Log("🎉 YOU WIN!"); // bạn có thể thay bằng UI hoặc animation sau này
 
-        // ⚙️ Nếu bạn có scene quản lý, có thể gọi hàm
-        // GameManager.Instance.WinGame(); 
-        // hoặc load scene chiến thắng:
-        // SceneManager.LoadScene("WinScene");
+    // 📱 Cho UI Button Space gọi (nếu muốn)
+    public void OnPickupButton()
+    {
+        TryPickupOrDrop();
     }
 
+    private void TryPickupOrDrop()
+    {
+        if (wingame)
+        {
+            WinGame();
+            return;
+        }
+
+        if (carriedBox == null && nearbyBox != null)
+            PickupBox(nearbyBox);
+        else if (carriedBox != null)
+            DropBox();
+    }
+
+    void WinGame()
+    {
+        levelController.panelWin.SetActive(false);
+        GameManager.Instance.WinGame();
+    }
+
+    
     void PickupBox(BoxHighlighter box)
     {
-        isColliding = false;
         carriedBox = box;
         box.SetPickedUp(true);
 
@@ -140,37 +161,6 @@ public class PlayerController : MonoSingleton<PlayerController>
 
         carriedBoxStatus = true;
     }
-
-    // void DropBox()
-    // {
-    //     isColliding = false;
-    //     if (carriedBox == null)
-    //         return;
-
-    //     carriedBox.SetPickedUp(false);
-
-    //     // Bật lại collider
-    //     foreach (var c in carriedBox.GetComponentsInChildren<Collider>())
-    //         c.enabled = true;
-
-    //     // Nếu player đang gần slot → đặt box vào đó
-    //     if (nearbySlot != null)
-    //     {
-    //         carriedBox.transform.SetParent(null);
-    //         carriedBox.transform.position = nearbySlot.GetSlotPosition();
-    //         nearbySlot.SetBox(true); // thông báo slot đã có box
-    //         nearbySlot.boxHighlighter = carriedBox; // liên kết slot với boxÍ
-    //     }
-    //     else
-    //     {
-    //         // Thả xuống bình thường
-    //         carriedBox.transform.SetParent(null);
-    //         carriedBox.transform.position = dropPoint.position;
-    //     }
-
-    //     carriedBox = null;
-    //     carriedBoxStatus = false;
-    // }
 
     void DropBox()
     {
@@ -245,7 +235,4 @@ public class PlayerController : MonoSingleton<PlayerController>
         if (nearbySlot2 == slot)
             nearbySlot2 = null;
     }
-
-
-
 }

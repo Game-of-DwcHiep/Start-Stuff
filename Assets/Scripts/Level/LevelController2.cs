@@ -2,17 +2,61 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum ActionType
+{
+    GoTo,
+    PickUp,
+    DropAt
+}
+
+[System.Serializable]
+public class BotActionStep
+{
+    public ActionType actionType;
+    public Transform targetPosition;
+}
+
 public class LevelController2 : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static LevelController2 Instance;
+    public BotController bot;
+    public List<BotActionStep> steps = new List<BotActionStep>();
+
+    private bool isRunning = false;
+
+    public GameObject panelWin;
+
+    public void StartSequence()
     {
-        
+        if (!isRunning)
+            StartCoroutine(RunSequence());
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator RunSequence()
     {
-        
+        isRunning = true;
+
+        foreach (var step in steps)
+        {
+            switch (step.actionType)
+            {
+                case ActionType.GoTo:
+                    yield return StartCoroutine(bot.MoveTo(step.targetPosition.position));
+                    break;
+
+                case ActionType.PickUp:
+                    yield return StartCoroutine(bot.PickUp(step.targetPosition.position));
+                    break;
+
+                case ActionType.DropAt:
+                    yield return StartCoroutine(bot.DropAt(step.targetPosition.position));
+                    break;
+            }
+
+            yield return new WaitForSeconds(0.2f); // nghỉ nhẹ giữa các bước
+        }
+
+        Debug.Log("🤖 Bot: All actions completed!");
+        isRunning = false;
     }
 }

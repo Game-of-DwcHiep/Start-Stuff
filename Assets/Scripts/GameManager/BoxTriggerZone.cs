@@ -15,8 +15,13 @@ public class BoxTriggerZone : MonoBehaviour
         {
             parentBox.SetHighlight(true);
             var pickup = other.GetComponent<PlayerController>();
+
             if (pickup != null)
                 pickup.SetNearbyBox(parentBox);
+
+                var botPickup = other.GetComponent<BotController>();
+            if (botPickup != null)
+                botPickup.SetNearbyBox(parentBox);
         }
     }
 
