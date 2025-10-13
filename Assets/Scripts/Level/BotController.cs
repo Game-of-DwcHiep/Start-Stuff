@@ -1,259 +1,403 @@
+// using Pathfinding;
+// using System.Collections;
+// using UnityEngine;
+
+// //[RequireComponent(typeof(Rigidbody))]
+// //[RequireComponent(typeof(BoxCollider))]
+// public class BotController : MonoBehaviour
+// {
+//     [Header("Movement Settings")]
+//     public float speed = 3f;
+
+//     [Header("Pickup Settings")]
+//     public Transform holdPoint;             
+//     public Transform dropPoint;             
+
+//     private Rigidbody rb;
+
+//     private BoxHighlighter carriedBox;      
+//     public BoxSlot nearbySlot;              
+//     public BoxHighlighter nearbyBox;
+
+//     public Transform transformCurrent;
+//     public Transform target;
+//     IAstarAI ai;
+//     public bool isStop = true;
+
+//     void Start()
+//     {
+//         rb = GetComponent<Rigidbody>();
+//         rb.freezeRotation = true;
+//         isStop = true;
+//     }
+//     void OnEnable()
+//     {
+//         ai = GetComponent<IAstarAI>();
+//         if (ai != null) ai.onSearchPath += Update;
+//     }
+
+//     void OnDisable()
+//     {
+//         if (ai != null) ai.onSearchPath -= Update;
+//         isStop = true;
+//     }
+
+//     /// <summary>Updates the AI's destination every frame</summary>
+//     void Update()
+//     {
+//         if (target != null && ai != null && !isStop) ai.destination = target.position;
+//     }
+
+//     public bool CanReach(Vector3 targetPosition)
+//     {
+//         // Lấy nearest node của bot và target
+//         var startNode = AstarPath.active.GetNearest(transform.position).node;
+//         var endNode = AstarPath.active.GetNearest(targetPosition).node;
+
+//         // Kiểm tra nếu một trong hai node null → không thể đi
+//         if (startNode == null || endNode == null)
+//             return false;
+
+//         // Kiểm tra có kết nối hay không
+//         return PathUtilities.IsPathPossible(startNode, endNode);
+//     }
+
+//     public IEnumerator PickUp(Vector3 targetPosition)
+//     {
+//         // 🔹 Kiểm tra xem có đường không
+//         if (!CanReach(targetPosition))
+//         {
+//             Debug.LogWarning("❌ Bot không thể di chuyển đến vị trí pickup!");
+//             yield break;
+//         }
+
+//         // 🔹 Di chuyển đến vị trí box
+//         while (nearbyBox == null)
+//         {
+//             Vector3 direction = (targetPosition - transform.position).normalized;
+//             transform.rotation = Quaternion.LookRotation(-direction);
+//             rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+//             yield return null;
+//         }
+
+//         // 🔹 Khi tới gần box
+//         if (nearbyBox != null)
+//         {
+//             carriedBox = nearbyBox;
+//             nearbyBox.SetPickedUp(true);
+
+//             foreach (var c in nearbyBox.GetComponentsInChildren<Collider>())
+//                 c.enabled = false;
+
+//             nearbyBox.transform.SetParent(holdPoint);
+//             nearbyBox.transform.localPosition = Vector3.zero;
+//             nearbyBox.transform.localRotation = Quaternion.identity;
+
+//             nearbyBox = null;
+//         }
+//     }
+
+//     public IEnumerator DropAt(Vector3 targetPosition)
+//     {
+//         if (carriedBox == null)
+//             yield break;
+
+//         if (!CanReach(targetPosition))
+//         {
+//             Debug.LogWarning("❌ Bot không thể di chuyển đến vị trí drop!");
+//             yield break;
+//         }
+
+//         while (nearbySlot == null)
+//         {
+//             Vector3 direction = (targetPosition - transform.position).normalized;
+//             transform.rotation = Quaternion.LookRotation(-direction);
+//             rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+//             yield return null;
+//         }
+
+//         if (nearbySlot != null)
+//         {
+//             carriedBox.SetPickedUp(false);
+//             foreach (var c in carriedBox.GetComponentsInChildren<Collider>())
+//                 c.enabled = true;
+
+//             carriedBox.transform.SetParent(null);
+//             carriedBox.transform.position = nearbySlot.GetSlotPosition();
+
+//             nearbySlot.SetBox(true);
+//             nearbySlot.boxHighlighter = carriedBox;
+
+//             carriedBox = null;
+//             nearbySlot = null;
+//         }
+//     }
+
+
+//     // public IEnumerator PickUp( Vector3 targetPosition)
+//     // {
+
+//     //     while (nearbyBox == null)
+//     //     {
+//     //         Vector3 direction = (targetPosition - transform.position).normalized;
+//     //         transform.rotation = Quaternion.LookRotation(-direction);
+//     //         rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+//     //         yield return null;
+//     //     }
+//     //     // 2️⃣ Khi đã nhận được nearbyBox → nhặt box
+//     //     if (nearbyBox != null)
+//     //     {
+//     //         carriedBox = nearbyBox;
+//     //         nearbyBox.SetPickedUp(true);
+
+//     //         // 🔹 Tắt collider
+//     //         foreach (var c in nearbyBox.GetComponentsInChildren<Collider>())
+//     //             c.enabled = false;
+
+//     //         // 🔹 Gắn box lên tay bot
+//     //         nearbyBox.transform.SetParent(holdPoint);
+//     //         nearbyBox.transform.localPosition = Vector3.zero;
+//     //         nearbyBox.transform.localRotation = Quaternion.identity;
+
+//     //         // 🔹 Reset nearbyBox (để tránh trigger lại nhặt)
+//     //         nearbyBox = null;
+//     //     }
+//     // }
+
+//     // public IEnumerator DropAt(Vector3 targetPosition)
+//     // {
+//     //     if (carriedBox == null)
+//     //         yield break;
+
+//     //     while (nearbySlot == null)
+//     //     {
+//     //         Vector3 direction = (targetPosition - transform.position).normalized;
+//     //         transform.rotation = Quaternion.LookRotation(-direction);
+//     //         rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+//     //         yield return null;
+//     //     }
+
+//     //     // 2️⃣ Khi đã đến slot → thả box xuống
+//     //     if (nearbySlot != null)
+//     //     {
+//     //         carriedBox.SetPickedUp(false);
+
+//     //         foreach (var c in carriedBox.GetComponentsInChildren<Collider>())
+//     //             c.enabled = true;
+
+//     //         carriedBox.transform.SetParent(null);
+//     //         carriedBox.transform.position = nearbySlot.GetSlotPosition();
+
+//     //         nearbySlot.SetBox(true);
+//     //         nearbySlot.boxHighlighter = carriedBox;
+
+//     //         carriedBox = null;
+//     //         nearbySlot = null;
+//     //     }
+//     // }
+
+//     // =============================
+//     //  Gắn slot / box gần nhất từ trigger
+//     // =============================
+//     public void SetNearbySlot(BoxSlot slot)
+//     {
+//         nearbySlot = slot;
+//     }
+
+//     public void SetNearbyBox(BoxHighlighter box)
+//     {
+//         nearbyBox = box;
+//     }
+
+//     public void ClearNearbySlot(BoxSlot slot)
+//     {
+//         if (nearbySlot == slot)
+//             nearbySlot = null;
+//     }
+
+//     public void ClearNearbyBox(BoxHighlighter box)
+//     {
+//         if (nearbyBox == box)
+//             nearbyBox = null;
+//     }
+// }
+
 using Pathfinding;
 using System.Collections;
 using UnityEngine;
 
-//[RequireComponent(typeof(Rigidbody))]
-//[RequireComponent(typeof(BoxCollider))]
 public class BotController : MonoBehaviour
 {
-    [Header("Movement Settings")]
-    public float speed = 3f;
+    public Transform holdPoint;
 
-    [Header("Pickup Settings")]
-    public Transform holdPoint;             
-    public Transform dropPoint;             
-
+    private IAstarAI ai;
     private Rigidbody rb;
 
-    private BoxHighlighter carriedBox;      
-    public BoxSlot nearbySlot;              
+    public BoxHighlighter carriedBox;
+    public BoxSlot nearbySlot;
     public BoxHighlighter nearbyBox;
-
-    public Transform transformCurrent;
-    public Transform target;
-    IAstarAI ai;
     public bool isStop = true;
 
-    void Start()
+    private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        rb.freezeRotation = true;
-        isStop = true;
-    }
-    void OnEnable()
-    {
         ai = GetComponent<IAstarAI>();
-        // Update the destination right before searching for a path as well.
-        // This is enough in theory, but this script will also update the destination every
-        // frame as the destination is used for debugging and may be used for other things by other
-        // scripts as well. So it makes sense that it is up to date every frame.
-        if (ai != null) ai.onSearchPath += Update;
+        rb.freezeRotation = true;
     }
 
-    void OnDisable()
+    // ✅ Kiểm tra có thể di chuyển đến vị trí hay không
+    public bool CanReach(Vector3 targetPosition)
     {
-        if (ai != null) ai.onSearchPath -= Update;
+        var startNode = AstarPath.active.GetNearest(transform.position).node;
+        var endNode = AstarPath.active.GetNearest(targetPosition).node;
+        if (startNode == null || endNode == null) return false;
+        return Pathfinding.PathUtilities.IsPathPossible(startNode, endNode);
+    }
+
+    // ✅ Di chuyển đến vị trí bằng A* (tự động)
+    public IEnumerator MoveTo(Vector3 targetPosition)
+    {
+        if (!CanReach(targetPosition))
+        {
+            Debug.LogWarning("⚠️ Không có đường đến vị trí này!");
+            yield break;
+        }
+
+        ai.destination = targetPosition;
+        ai.SearchPath();
+        isStop = false;
+
+        var aipath = ai as AIPath;
+
+        while (ai.pathPending || aipath.remainingDistance > aipath.endReachedDistance)
+        {
+            yield return null;
+        }   
+
         isStop = true;
     }
 
-    /// <summary>Updates the AI's destination every frame</summary>
-    void Update()
-    {
-        if (target != null && ai != null && !isStop) ai.destination = target.position;
-    }
-
-    // =============================
-    //  Di chuyển tự động
-    // =============================
-    // public IEnumerator MoveTo(Vector3 target)
+    // ✅ Hành động nhặt box
+    // public IEnumerator PickUp(Vector3 targetPosition)
     // {
-    //     Vector3 direction = (target - transform.position).normalized;
-    //     transform.rotation = Quaternion.LookRotation(-direction);
-    //     while (Vector3.Distance(transform.position, target) > 0.1f)
-    //     {         
-    //         direction = (target - transform.position).normalized;
-    //         rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
-    //         yield return null;
+    //     // 1️⃣ Di chuyển tới vị trí box
+    //     yield return MoveTo(targetPosition);
+
+    //     if (nearbyBox == null)
+    //     {
+    //         Debug.LogWarning("❌ Không có box nào để nhặt!");
+    //         yield break;
     //     }
-    //     if(nearbySlot != null)
-    //         nearbySlot.SetBox(false);
+
+    //     // 2️⃣ Nhặt box
+    //     carriedBox = nearbyBox;
+    //     nearbyBox.SetPickedUp(true);
+
+    //     foreach (var c in nearbyBox.GetComponentsInChildren<Collider>())
+    //         c.enabled = false;
+
+    //     nearbyBox.transform.SetParent(holdPoint);
+    //     nearbyBox.transform.position = Vector3.zero;
+    //     nearbyBox.transform.rotation = Quaternion.identity;
+
+    //     nearbyBox = null;
+
+    //     Debug.Log("✅ Đã nhặt box thành công!");
     // }
 
-    // public IEnumerator MoveTo(Vector3 target)
-    // {
-    //     // 1️⃣ Di chuyển theo trục X trước
-    //     Vector3 start = transform.position;
-
-    //     // di chuyển trên trục X
-    //     while (Mathf.Abs(transform.position.x - target.x) > 0.05f)
-    //     {
-    //         float directionX = Mathf.Sign(target.x - transform.position.x);
-    //         Vector3 moveDir = new Vector3(directionX, 0, 0);
-    //         transform.rotation = Quaternion.LookRotation(-moveDir);
-    //         rb.MovePosition(rb.position + moveDir * speed * Time.deltaTime);
-    //         yield return null;
-    //     }
-
-    //     // 2️⃣ Sau đó di chuyển theo trục Z
-    //     while (Mathf.Abs(transform.position.z - target.z) > 0.05f)
-    //     {
-    //         float directionZ = Mathf.Sign(target.z - transform.position.z);
-    //         Vector3 moveDir = new Vector3(0, 0, directionZ);
-    //         transform.rotation = Quaternion.LookRotation(-moveDir);
-    //         rb.MovePosition(rb.position + moveDir * speed * Time.deltaTime);
-    //         yield return null;
-    //     }
-
-    //     // Giữ nguyên Y (tránh thay đổi độ cao)
-    //     transform.position = new Vector3(target.x, start.y, target.z);
-
-    //     // ✅ Dừng lại hoàn toàn khi đến nơi
-    //     rb.linearVelocity = Vector3.zero;
-
-    //     if (nearbySlot != null)
-    //         nearbySlot.SetBox(false);
-    // }
-
-    public IEnumerator MoveTo(Vector3 target)
+    public IEnumerator PickUp(Vector3 targetPosition)
     {
-        Vector3 start = transform.position;
-        Vector3 current = start;
-
-        // Giới hạn vòng lặp (phòng tránh lỗi vô hạn)
-        int safetyCounter = 0;
-
-        while (Vector3.Distance(current, target) > 0.1f && safetyCounter < 500)
-        {
-            safetyCounter++;
-
-            // Tính hướng di chuyển chính (theo trục lớn hơn)
-            Vector3 diff = target - current;
-            Vector3 moveDir = Vector3.zero;
-
-            // Chọn trục nào còn xa hơn
-            if (Mathf.Abs(diff.x) > Mathf.Abs(diff.z))
-                moveDir = new Vector3(Mathf.Sign(diff.x), 0, 0);
-            else
-                moveDir = new Vector3(0, 0, Mathf.Sign(diff.z));
-
-            // Kiểm tra xem hướng đó có bị chặn không
-            if (Physics.Raycast(current + Vector3.up * 0.5f, moveDir, out RaycastHit hit, 1f))
-            {
-                // Nếu bị chặn, thử đổi trục
-                Vector3 altDir = (moveDir.x != 0) ? new Vector3(0, 0, Mathf.Sign(diff.z)) : new Vector3(Mathf.Sign(diff.x), 0, 0);
-
-                // Nếu hướng phụ không bị chặn → đi hướng đó
-                if (!Physics.Raycast(current + Vector3.up * 0.5f, altDir, 1f))
-                {
-                    moveDir = altDir;
-                }
-                else
-                {
-                    // Nếu cả hai hướng đều bị chặn → dừng
-                    Debug.LogWarning("🚧 Bot bị kẹt tại " + current);
-                    yield break;
-                }
-            }
-
-            // Xoay bot theo hướng di chuyển
-            transform.rotation = Quaternion.LookRotation(-moveDir);
-
-            // Di chuyển dần dần tới bước tiếp theo
-            Vector3 nextPos = current + moveDir;
-            while (Vector3.Distance(transform.position, nextPos) > 0.05f)
-            {
-                rb.MovePosition(Vector3.MoveTowards(rb.position, nextPos, speed * Time.deltaTime));
-                yield return null;
-            }
-
-            current = nextPos; // cập nhật vị trí mới
-        }
-
-        rb.linearVelocity = Vector3.zero;
-        transform.position = new Vector3(target.x, start.y, target.z);
-        if (nearbySlot != null)
-            nearbySlot.SetBox(false);
-
-        //AstarPath.active.Scan();
-    }
-
-
-    // =============================
-    //  Hành động: Nhặt box
-    // =============================
-    public IEnumerator FollowTarget()
-    {
-        // Chờ đến khi có target
-        while (transform == null) yield return null;
-
-        // Cập nhật destination liên tục trong khi còn khoảng cách
-        while (true)
-        {
-            if (ai != null && transform != null)
-            {
-                ai.destination = transform.position;
-
-                // Nếu đã đến gần target thì dừng
-                if (!ai.pathPending && ai.reachedEndOfPath && !ai.hasPath)
-                {
-                    yield break; // Dừng coroutine
-                }
-            }
-            Debug.LogError("bb");   
-            yield return new WaitForSeconds(0.1f); // Cập nhật mỗi 0.1 giây (hoặc tùy bạn)
-        }
-    }
-    public IEnumerator PickUp( Vector3 targetPosition)
-    {
-
-        while (nearbyBox == null)
-        {
-            Vector3 direction = (targetPosition - transform.position).normalized;
-            transform.rotation = Quaternion.LookRotation(-direction);
-            rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
-            yield return null;
-        }
-        // 2️⃣ Khi đã nhận được nearbyBox → nhặt box
+        // Tạm disable collider của box target trước khi đi
         if (nearbyBox != null)
         {
+            foreach (var c in nearbyBox.GetComponentsInChildren<Collider>())
+                c.enabled = false;
+        }
+
+        // Di chuyển đến box (dùng pathfinding)
+        ai.destination = targetPosition;
+        ai.SearchPath();
+        isStop = false;
+
+        var aipath = ai as AIPath;
+
+        while (nearbyBox == null && (ai.pathPending || aipath.remainingDistance > aipath.endReachedDistance))
+        {
+            yield return null;
+        }
+        isStop = true;
+        // Khi đến nơi -> nhặt box
+        if (nearbyBox != null)
+        {
+            Debug.LogError("aaa");
             carriedBox = nearbyBox;
             nearbyBox.SetPickedUp(true);
 
-            // 🔹 Tắt collider
-            foreach (var c in nearbyBox.GetComponentsInChildren<Collider>())
-                c.enabled = false;
-
-            // 🔹 Gắn box lên tay bot
+            // Gắn box lên tay bot
             nearbyBox.transform.SetParent(holdPoint);
             nearbyBox.transform.localPosition = Vector3.zero;
             nearbyBox.transform.localRotation = Quaternion.identity;
-
-            // 🔹 Reset nearbyBox (để tránh trigger lại nhặt)
             nearbyBox = null;
         }
     }
 
+    // ✅ Hành động thả box
     public IEnumerator DropAt(Vector3 targetPosition)
     {
         if (carriedBox == null)
-            yield break;
-
-        while (nearbySlot == null)
         {
-            Vector3 direction = (targetPosition - transform.position).normalized;
-            transform.rotation = Quaternion.LookRotation(-direction);
-            rb.MovePosition(rb.position + direction * speed * Time.deltaTime);
+            Debug.LogWarning("❌ Không có box nào để thả!");
+            yield break;
+        }
+
+        // 🔹 Di chuyển đến vị trí target
+        ai.destination = targetPosition;
+        ai.SearchPath();
+        isStop = false;
+
+        var aipath = ai as AIPath;
+
+        // 🔸 Chỉ tiếp tục di chuyển khi chưa vào vùng slot
+        while (nearbySlot == null && (ai.pathPending || aipath.remainingDistance > aipath.endReachedDistance))
+        {
             yield return null;
         }
 
-        // 2️⃣ Khi đã đến slot → thả box xuống
-        if (nearbySlot != null)
+        // 🔸 Khi phát hiện slot, dừng lại
+        isStop = true;
+        ai.destination = transform.position; // dừng di chuyển hoàn toàn
+
+        if (nearbySlot == null)
         {
-            carriedBox.SetPickedUp(false);
-
-            foreach (var c in carriedBox.GetComponentsInChildren<Collider>())
-                c.enabled = true;
-
-            carriedBox.transform.SetParent(null);
-            carriedBox.transform.position = nearbySlot.GetSlotPosition();
-
-            nearbySlot.SetBox(true);
-            nearbySlot.boxHighlighter = carriedBox;
-
-            carriedBox = null;
-            nearbySlot = null;
+            Debug.LogWarning("❌ Không tìm thấy slot để thả box!");
+            yield break;
         }
+
+        // ==========================
+        //  THẢ BOX VÀO SLOT
+        // ==========================
+        carriedBox.SetPickedUp(false);
+
+        foreach (var c in carriedBox.GetComponentsInChildren<Collider>())
+            c.enabled = true;
+
+        // 🔹 Gắn box vào slot
+        carriedBox.transform.SetParent(nearbySlot.transform);
+        carriedBox.transform.localPosition = Vector3.zero + Vector3.forward * 0.5f; // nâng lên một chút cho đẹp
+        carriedBox.transform.localRotation = Quaternion.identity;
+
+        // 🔹 Cập nhật trạng thái slot
+        nearbySlot.SetBox(true);
+        nearbySlot.boxHighlighter = carriedBox;
+
+        // 🔹 Reset lại biến tạm
+        carriedBox = null;
+        nearbySlot = null;
+
+        Debug.Log("✅ Đã thả box thành công vào slot!");
     }
+
+
 
     // =============================
     //  Gắn slot / box gần nhất từ trigger
