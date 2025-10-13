@@ -1,8 +1,9 @@
+using Pathfinding;
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
-[RequireComponent(typeof(BoxCollider))]
+//[RequireComponent(typeof(Rigidbody))]
+//[RequireComponent(typeof(BoxCollider))]
 public class BotController : MonoBehaviour
 {
     [Header("Movement Settings")]
@@ -16,12 +17,39 @@ public class BotController : MonoBehaviour
 
     private BoxHighlighter carriedBox;      
     public BoxSlot nearbySlot;              
-    public BoxHighlighter nearbyBox;       
+    public BoxHighlighter nearbyBox;
+
+    public Transform transformCurrent;
+    public Transform target;
+    IAstarAI ai;
+    public bool isStop = true;
 
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        isStop = true;
+    }
+    void OnEnable()
+    {
+        ai = GetComponent<IAstarAI>();
+        // Update the destination right before searching for a path as well.
+        // This is enough in theory, but this script will also update the destination every
+        // frame as the destination is used for debugging and may be used for other things by other
+        // scripts as well. So it makes sense that it is up to date every frame.
+        if (ai != null) ai.onSearchPath += Update;
+    }
+
+    void OnDisable()
+    {
+        if (ai != null) ai.onSearchPath -= Update;
+        isStop = true;
+    }
+
+    /// <summary>Updates the AI's destination every frame</summary>
+    void Update()
+    {
+        if (target != null && ai != null && !isStop) ai.destination = target.position;
     }
 
     // =============================
@@ -135,12 +163,36 @@ public class BotController : MonoBehaviour
         transform.position = new Vector3(target.x, start.y, target.z);
         if (nearbySlot != null)
             nearbySlot.SetBox(false);
+
+        //AstarPath.active.Scan();
     }
 
 
     // =============================
     //  Hành động: Nhặt box
     // =============================
+    public IEnumerator FollowTarget()
+    {
+        // Chờ đến khi có target
+        while (transform == null) yield return null;
+
+        // Cập nhật destination liên tục trong khi còn khoảng cách
+        while (true)
+        {
+            if (ai != null && transform != null)
+            {
+                ai.destination = transform.position;
+
+                // Nếu đã đến gần target thì dừng
+                if (!ai.pathPending && ai.reachedEndOfPath && !ai.hasPath)
+                {
+                    yield break; // Dừng coroutine
+                }
+            }
+            Debug.LogError("bb");   
+            yield return new WaitForSeconds(0.1f); // Cập nhật mỗi 0.1 giây (hoặc tùy bạn)
+        }
+    }
     public IEnumerator PickUp( Vector3 targetPosition)
     {
 

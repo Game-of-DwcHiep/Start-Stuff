@@ -8,4 +8,8 @@ public class SelectScene : MonoBehaviour
         // sceneName là tên scene bạn đã thêm trong Build Settings
         SceneManager.LoadScene(sceneName);
     }
+    public void Abc()
+    {
+        AstarPath.active.Scan();
+    }    
 }

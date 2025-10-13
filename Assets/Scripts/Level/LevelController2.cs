@@ -41,7 +41,10 @@ public class LevelController2 : MonoBehaviour
             switch (step.actionType)
             {
                 case ActionType.GoTo:
-                    yield return StartCoroutine(bot.MoveTo(step.targetPosition.position));
+                    step.targetPosition = bot.target;
+                    yield return bot.isStop = false;
+                    //yield return StartCoroutine(bot.MoveTo(step.targetPosition.position));
+                    //yield return StartCoroutine(bot.FollowTarget(step.targetPosition));
                     break;
 
                 case ActionType.PickUp:
