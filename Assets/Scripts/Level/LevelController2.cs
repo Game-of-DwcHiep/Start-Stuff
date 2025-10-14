@@ -75,6 +75,13 @@ public class LevelController2 : MonoBehaviour
     private bool isRunning = false;
     public GameObject panelWin;
 
+    public Vector3 _camera;
+
+    private void Start()
+    {
+        GameManager.Instance.targetPos = _camera;
+    }
+
     public void StartSequence()
     {
         if (!isRunning)

@@ -34,8 +34,13 @@ public class BoxSlot : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if(isPlayerInside)
+        if (isPlayerInside || hasBox)
+        {
             boxCollider.enabled = false;
+            //AstarPath.active.Scan();
+        }
+        else
+            boxCollider.enabled = true;
     }
     void OnTriggerEnter(Collider other)
     {

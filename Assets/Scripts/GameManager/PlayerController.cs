@@ -174,8 +174,10 @@ public class PlayerController : MonoBehaviour
             c.enabled = true;
         if (nearbySlot != null)
         {
-            carriedBox.transform.SetParent(null);
-            carriedBox.transform.position = nearbySlot.GetSlotPosition();
+            carriedBox.transform.SetParent(nearbySlot.transform);
+            carriedBox.transform.localPosition = Vector3.zero + Vector3.forward * 0.5f; // nâng lên một chút cho đẹp
+            carriedBox.transform.localRotation = Quaternion.identity;
+            //carriedBox.transform.position = nearbySlot.GetSlotPosition();
             nearbySlot.SetBox(true); // thông báo slot đã có box
             nearbySlot.boxHighlighter = carriedBox; // liên kết slot với boxÍ
         }

@@ -276,35 +276,6 @@ public class BotController : MonoBehaviour
 
         isStop = true;
     }
-
-    // ✅ Hành động nhặt box
-    // public IEnumerator PickUp(Vector3 targetPosition)
-    // {
-    //     // 1️⃣ Di chuyển tới vị trí box
-    //     yield return MoveTo(targetPosition);
-
-    //     if (nearbyBox == null)
-    //     {
-    //         Debug.LogWarning("❌ Không có box nào để nhặt!");
-    //         yield break;
-    //     }
-
-    //     // 2️⃣ Nhặt box
-    //     carriedBox = nearbyBox;
-    //     nearbyBox.SetPickedUp(true);
-
-    //     foreach (var c in nearbyBox.GetComponentsInChildren<Collider>())
-    //         c.enabled = false;
-
-    //     nearbyBox.transform.SetParent(holdPoint);
-    //     nearbyBox.transform.position = Vector3.zero;
-    //     nearbyBox.transform.rotation = Quaternion.identity;
-
-    //     nearbyBox = null;
-
-    //     Debug.Log("✅ Đã nhặt box thành công!");
-    // }
-
     public IEnumerator PickUp(Vector3 targetPosition)
     {
         // Tạm disable collider của box target trước khi đi
@@ -329,7 +300,6 @@ public class BotController : MonoBehaviour
         // Khi đến nơi -> nhặt box
         if (nearbyBox != null)
         {
-            Debug.LogError("aaa");
             carriedBox = nearbyBox;
             nearbyBox.SetPickedUp(true);
 
