@@ -14,7 +14,8 @@ public class BoxSlot : MonoBehaviour
 
     [Header("Slot State")]
     public bool hasBox = false;            
-    public bool isPlayerInside = false;    
+    private int insideCount = 0;
+    public bool isPlayerInside => insideCount > 0;  
 
     public BoxHighlighter boxHighlighter;
     public BoxCollider boxCollider;
@@ -44,37 +45,53 @@ public class BoxSlot : MonoBehaviour
     }
     void OnTriggerEnter(Collider other)
     {
-        // 🎮 Player vào vùng
         if (other.CompareTag("Player"))
         {
-            player = other.GetComponent<PlayerController>();
-            isPlayerInside = true;
-            if (player != null)
+            // Player
+            var p = other.GetComponent<PlayerController>();
+            if (p != null)
+            {
+                player = p;
                 player.SetNearbySlot(this);
-            bot = other.GetComponent<BotController>();
-            isPlayerInside = true;
-            if (bot != null)
+            }
+
+            // Bot
+            var b = other.GetComponent<BotController>();
+            if (b != null)
+            {
+                bot = b;
                 bot.SetNearbySlot(this);
+            }
+
+            insideCount++; // ✅ tăng số lượng khi có ai đó bước vào
             UpdateMaterial();
         }
     }
+
 
     void OnTriggerExit(Collider other)
     {
-        // 🎮 Player rời vùng
         if (other.CompareTag("Player"))
         {
-            player?.ClearNearbySlot(this);
-            player = null;
-            isPlayerInside = false;
+            var p = other.GetComponent<PlayerController>();
+            if (p != null)
+            {
+                p.ClearNearbySlot(this);
+                if (player == p) player = null;
+            }
 
-            bot?.ClearNearbySlot(this);
-            bot = null;
+            var b = other.GetComponent<BotController>();
+            if (b != null)
+            {
+                b.ClearNearbySlot(this);
+                if (bot == b) bot = null;
+            }
 
+            insideCount = Mathf.Max(0, insideCount - 1); // ✅ giảm số lượng
             UpdateMaterial();
         }
-
     }
+
 
     // 📦 Đặt hoặc gỡ box
     public void SetBox(bool value)

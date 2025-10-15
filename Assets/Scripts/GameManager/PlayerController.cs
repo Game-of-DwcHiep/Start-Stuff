@@ -30,6 +30,9 @@ public class PlayerController : MonoBehaviour
 
     public int level;
 
+    [Header("Indicator Settings")]
+    public GameObject exclamationMark;
+
     // ✅ Dùng cho di chuyển bằng UI (mobile)
     private Vector2 uiMoveInput = Vector2.zero;
 
@@ -43,11 +46,21 @@ public class PlayerController : MonoBehaviour
     {
         HandleMovementInput();
         HandlePickupInput();
+        UpdateExclamationMark(); 
     }
 
     void FixedUpdate()
     {
         MovePlayer();
+    }
+
+    void UpdateExclamationMark()
+    {
+        // Nếu có box gần và chưa cầm box nào => hiện chấm than
+        bool shouldShow = (nearbyBox != null && carriedBox == null);
+
+        if (exclamationMark != null && exclamationMark.activeSelf != shouldShow)
+            exclamationMark.SetActive(shouldShow);
     }
 
     // =============================
