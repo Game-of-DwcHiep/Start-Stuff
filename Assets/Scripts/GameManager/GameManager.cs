@@ -12,9 +12,50 @@ public class GameManager : MonoSingleton<GameManager>
     public Material highlightMat;
 
     public Vector3 targetPos;
-    public void WinGame()
+
+    private const string KEY_LEVEL = "CurrentLevel";
+
+    private int currentLevel;
+
+    private void Start()
     {
+        InitializeLevelData();
+    }
+    private void InitializeLevelData()
+    {
+        if (!PlayerPrefs.HasKey(KEY_LEVEL))
+        {
+            // 🔹 Nếu chưa có dữ liệu thì đặt mặc định là level 1
+            currentLevel = 1;
+            SaveLevel(currentLevel);
+            Debug.Log("🆕 Lần đầu vào game → Khởi tạo Level = 1");
+        }
+        else
+        {
+            // 🔹 Nếu có rồi thì load từ PlayerPrefs
+            currentLevel = LoadLevel();
+            Debug.Log($"📖 Đã tải dữ liệu level: {currentLevel}");
+        }
+    }
+    public void SaveLevel(int levelIndex)
+    {
+        currentLevel = levelIndex;
+        PlayerPrefs.SetInt(KEY_LEVEL, levelIndex);
+        PlayerPrefs.Save();
+        Debug.Log($"✅ Đã lưu level: {levelIndex}");
+    }
+
+    public int LoadLevel()
+    {
+        return PlayerPrefs.GetInt(KEY_LEVEL, 1);
+    }
+
+    public void WinGame(int level)
+    {
+        
         StartCoroutine(MoveCameraToWinPosition());
+        if(level > currentLevel)
+            SaveLevel(level);
     }
     IEnumerator MoveCameraToWinPosition()
     {

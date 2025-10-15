@@ -28,6 +28,8 @@ public class PlayerController : MonoBehaviour
     public BoxSlot2 nearbySlot2;
     public bool wingame = false;
 
+    public int level;
+
     // ✅ Dùng cho di chuyển bằng UI (mobile)
     private Vector2 uiMoveInput = Vector2.zero;
 
@@ -136,7 +138,8 @@ public class PlayerController : MonoBehaviour
     void WinGame()
     {
         levelController.panelWin.SetActive(false);
-        GameManager.Instance.WinGame();
+        GameManager.Instance.WinGame(level);
+        SoundManager.Instance.PlayWinMusic();
     }
 
     

@@ -1837,7 +1837,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0164a9a2562014c6baa5c04c0fe94e60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelController: {fileID: 0}
+  levelController: {fileID: 1935275769}
   moveSpeed: 10
   holdPoint: {fileID: 1352306834}
   dropPoint: {fileID: 494017335}
@@ -1846,6 +1846,7 @@ MonoBehaviour:
   nearbySlot: {fileID: 0}
   nearbySlot2: {fileID: 0}
   wingame: 0
+  level: 5
 --- !u!1 &472507293
 GameObject:
   m_ObjectHideFlags: 0
@@ -2204,8 +2205,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 120.67396, y: 96.41293, z: 41.38701}
-  m_Center: {x: 13.987492, y: -30.898499, z: -13.682137}
+  m_Size: {x: 121.33313, y: 96.41293, z: 47.272453}
+  m_Center: {x: 8.685288, y: -30.898499, z: -10.739417}
 --- !u!1 &542122391
 GameObject:
   m_ObjectHideFlags: 0
@@ -4678,8 +4679,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 71.55679, y: 96.41293, z: 41.38701}
-  m_Center: {x: -10.571089, y: -30.898499, z: -13.682137}
+  m_Size: {x: 73.51917, y: 96.41293, z: 47.45466}
+  m_Center: {x: -20.05742, y: -30.898499, z: -10.648329}
 --- !u!1 &1228632781
 GameObject:
   m_ObjectHideFlags: 0
@@ -5196,8 +5197,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 152.26582, y: 28.163624, z: 25.728935}
-  m_Center: {x: 29.783463, y: -13.581812, z: -138.30829}
+  m_Size: {x: 163.01944, y: 28.163624, z: 25.728931}
+  m_Center: {x: 24.406658, y: -13.581812, z: -138.30829}
 --- !u!1 &1350757938
 GameObject:
   m_ObjectHideFlags: 0
@@ -6775,7 +6776,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -151, y: -12}
+  m_AnchoredPosition: {x: -508, y: -12}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1974058015

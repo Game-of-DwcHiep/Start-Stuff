@@ -1913,6 +1913,7 @@ MonoBehaviour:
   nearbySlot: {fileID: 0}
   nearbySlot2: {fileID: 0}
   wingame: 0
+  level: 2
 --- !u!4 &1351839779
 Transform:
   m_ObjectHideFlags: 0
@@ -2221,7 +2222,7 @@ MonoBehaviour:
   bot: {fileID: 0}
   steps: []
   panelWin: {fileID: 1687901570}
-  _camera: {x: 200, y: 73, z: -75}
+  _camera: {x: 200, y: 95, z: -35}
 --- !u!1 &1571959154
 GameObject:
   m_ObjectHideFlags: 0

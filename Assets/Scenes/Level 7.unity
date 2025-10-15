@@ -1900,7 +1900,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0164a9a2562014c6baa5c04c0fe94e60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  levelController: {fileID: 0}
+  levelController: {fileID: 1935275769}
   moveSpeed: 10
   holdPoint: {fileID: 1352306834}
   dropPoint: {fileID: 494017335}
@@ -1909,6 +1909,7 @@ MonoBehaviour:
   nearbySlot: {fileID: 0}
   nearbySlot2: {fileID: 0}
   wingame: 0
+  level: 8
 --- !u!1 &472507293
 GameObject:
   m_ObjectHideFlags: 0
@@ -6839,7 +6840,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
-  m_AnchoredPosition: {x: -151, y: -12}
+  m_AnchoredPosition: {x: -618, y: -12}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1974058015

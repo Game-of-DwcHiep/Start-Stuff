@@ -52,6 +52,7 @@ public class BoxSlot : MonoBehaviour
             if (player != null)
                 player.SetNearbySlot(this);
             bot = other.GetComponent<BotController>();
+            isPlayerInside = true;
             if (bot != null)
                 bot.SetNearbySlot(this);
             UpdateMaterial();
