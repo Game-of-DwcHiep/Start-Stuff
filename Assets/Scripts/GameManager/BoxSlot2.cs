@@ -11,7 +11,6 @@ public class BoxSlot2 : MonoBehaviour
     public MeshRenderer meshRenderer;       // hiển thị khối slot
     public MeshRenderer meshColliderLine;   // phần line (nếu có)
     public bool hasBox = false;             // đang có box chưa?
-    public bool isLocked => hasBox;         // khi có box thì slot khoá
 
     private void Start()
     {
@@ -34,7 +33,7 @@ public class BoxSlot2 : MonoBehaviour
         box.transform.SetParent(transform);
         SlotController.Instance.UnLock();
     }
-
+/*
     public void RemoveBox()
     {
         hasBox = false;
@@ -47,7 +46,7 @@ public class BoxSlot2 : MonoBehaviour
         pos.y = 12.7f;
         return pos;
     }
-
+*/
     public void UpdateMaterial(Material mat)
     {
         if (meshRenderer)

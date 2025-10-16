@@ -20,8 +20,8 @@ public class PlayerController : MonoBehaviour
     private Rigidbody rb;
     private Vector3 moveDir;
 
-    private BoxHighlighter nearbyBox;
-    private BoxHighlighter carriedBox;
+    public BoxHighlighter nearbyBox;
+    public BoxHighlighter carriedBox;
 
     public bool carriedBoxStatus = false;
     public BoxSlot nearbySlot;
@@ -40,13 +40,14 @@ public class PlayerController : MonoBehaviour
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        UpdateExclamationMark();
     }
 
     void Update()
     {
         HandleMovementInput();
         HandlePickupInput();
-        UpdateExclamationMark(); 
+        //UpdateExclamationMark(); 
     }
 
     void FixedUpdate()
@@ -56,7 +57,6 @@ public class PlayerController : MonoBehaviour
 
     void UpdateExclamationMark()
     {
-        // Nếu có box gần và chưa cầm box nào => hiện chấm than
         bool shouldShow = (nearbyBox != null && carriedBox == null);
 
         if (exclamationMark != null && exclamationMark.activeSelf != shouldShow)
@@ -176,6 +176,7 @@ public class PlayerController : MonoBehaviour
         }   
 
         carriedBoxStatus = true;
+        UpdateExclamationMark();
     }
 
     void DropBox()
@@ -210,19 +211,23 @@ public class PlayerController : MonoBehaviour
         }
 
         carriedBox = null;
+        nearbyBox = null;
         carriedBoxStatus = false;
+        UpdateExclamationMark();
     }
 
     // 📍 Liên kết với BoxTriggerZone (giữ nguyên)
     public void SetNearbyBox(BoxHighlighter box)
     {
         nearbyBox = box;
+        UpdateExclamationMark();
     }
 
     public void ClearNearbyBox(BoxHighlighter box)
     {
         if (nearbyBox == box)
             nearbyBox = null;
+        UpdateExclamationMark();
     }
     // =============================
     // 📍 Liên kết với BoxSlot
